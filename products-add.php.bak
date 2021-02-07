@@ -1,0 +1,683 @@
+<?php require_once('Connections/StarCreations.php');
+require_once('functions.php');
+
+$colname_productList = "-1";
+if (isset($_GET['ProductID'])) {
+	$colname_productList = $_GET['ProductID'];
+
+mysqli_select_db($StarCreations,$database_StarCreations);
+$query_productList = sprintf("SELECT * FROM Products WHERE ProductID = %s", GetSQLValueString($colname_productList, "int"));
+$productList = mysqli_query($StarCreations,$query_productList) or die(mysqli_error($StarCreations));
+$row_productList = mysqli_fetch_assoc($productList);
+$totalRows_productList = mysqli_num_rows($productList);
+
+mysqli_select_db($StarCreations,$database_StarCreations);
+$query_rsCustList = "SELECT CustomersID, Company FROM Customers";
+$rsCustList = mysqli_query($StarCreations,$query_rsCustList) or die(mysqli_error($StarCreations));
+$row_rsCustList = mysqli_fetch_assoc($rsCustList);
+$totalRows_rsCustList = mysqli_num_rows($rsCustList);
+
+} else {
+        mysqli_select_db($StarCreations,$database_StarCreations);
+        $query_lastproductID = "SELECT * FROM Products ORDER BY ProductID DESC LIMIT 1";
+        $lastproductID = mysqli_query($StarCreations,$query_lastproductID) or die(mysqli_error($StarCreations));
+        $row_lastproductID = mysqli_fetch_assoc($lastproductID);
+        $totalRows_lastproductID = mysqli_num_rows($lastproductID);
+        $colname_productList = $row_lastproductID['ProductID'];
+}
+require_once('header.php'); ?>
+
+<div class="page-header">
+    <h1>Products <small>Manage Products</small></h1>
+</div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span5">
+            <!--Sidebar content-->
+
+
+            <form action="actions/product-crud.php?action=add" method="post" id="productForm"  >
+                <legend> Product Info </legend>
+
+                <div class="controls">
+                    <div class="span12">
+                        <input type="hidden" name="ProductID"  id="ProductID" value="<?php echo $row_productList['ProductID']; ?>" />
+                        <label>Product ID# <?php echo $colname_productList; ?></label>
+			<label>Product Name</label>
+                        <input type="text" name="ProductName"	 class="span12" value="<?php echo $row_productList['ProductName']; ?>" required />
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="controls">
+                    <div class="span12">
+                        <div class="input-prepend span6" title="Product Code">
+                            <span class="add-on span3">Code</span>
+                            <input type="text" name="ProductCode" placeholder="Product Code" value="<?php echo $row_productList['ProductCode']; ?>" class="span9"  required />
+                        </div>
+
+                        <div class="input-prepend span3" Title="Product Lenght">
+                            <span class="add-on span4">L</span>
+                            <input type="text" name="PHeight" id="PHeight" placeholder="L"  value="<?php echo $row_productList['PHeight']; ?>" class="span8"    required />
+                        </div>
+
+                        <div class="input-prepend span3" title="Product Height">
+                            <span class="add-on span4">W</span>
+                            <input type="text" name="PWidth" id="PWidth" placeholder="W" value="<?php echo $row_productList['PWidth']; ?>" class="span8" required />
+                        </div>
+                    </div>
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <div class="input-prepend span4" title="Product Cost (Sum of Components)">
+                            <span class="add-on span4">Cost</span>
+                            <input type="text" name="Cost" placeholder="Cost" id="Cost" class="span8" value="<?php echo $row_productList['Cost']; ?>"  readonly />
+                        </div>
+                        <div class="input-prepend span4" title="Product Price">
+                            <span class="add-on span4">Price</span><input type="text" name="Price" placeholder="Price" id="Price" class="span8" value="<?php echo $row_productList['Price']; ?>"/>
+                        </div>
+                        <div class="input-prepend span4" title="Product Profit Margin">
+                            <span class="add-on span4">&nbsp; % &nbsp;</span>
+                            <input type="text" name="Percentage" placeholder="Percentage" id="Percentage" class="span8" readonly  value="<?php echo $row_productList['Percentage']; ?>"/>
+                        </div>
+
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <div class="input-prepend span4" title="Product Multiplier (Quantity in a package)">
+                            <span class="add-on span8">Total Cost</span>
+                            <input type="text" name="TotalCost" id="TotalCost" readonly class="span4"  value="<?php echo $row_productList['TotalCost']; ?>" />
+                        </div>
+                        <div class="input-prepend span4" title="Total Price">
+                            <span class="add-on span8">Total Price</span><input type="text"  class="span4" name="TotalPrice" placeholder="Total Price" id="TotalPrice"  readonly value="<?php echo $row_productList['TotalPrice']; ?>"/>
+                        </div>
+
+                        <div class="input-prepend span4" title="Product Multiplier (Quantity in a package)">
+                            <span class="add-on span8">Multiplier</span>
+                            <input type="text" name="Multiplier" id="Multiplier"  class="span4" value="<?php echo $row_productList['Multiplier']; ?>"  />
+                        </div>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <div class="span6">
+                            <label>Print Publisher</label>
+                            <input type="text" name="PrintPublisher" class="span12" value="<?php echo $row_productList['PrintPublisher']; ?>" />
+                        </div>
+                        <div class="span6">
+                            <label>Print Size</label>
+                            <input type="text" name="PrintSize" class="span12" value="<?php echo $row_productList['PrintSize']; ?>" />
+                        </div>
+
+
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <div class="span4">
+                            <label>Print Number</label>
+                            <input type="text" name="PrintNumber" class="span12" value="<?php echo $row_productList['PrintNumber']; ?>" />
+                        </div>
+                        <div class="span4">
+                            <label>Print Title</label>
+                            <input type="text" name="PrintTitle" class="span12" value="<?php echo $row_productList['PrintTitle']; ?>" />
+                        </div>
+                        <div class="span4">
+                            <label>Artist</label>
+                            <input type="text" name="PrintArtist" class="span12" value="<?php echo $row_productList['PrintArtist']; ?>" />
+                        </div>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="controls">
+                    <div class="span12">
+                        <div class="span6"><label>Outer Molding</label>
+                            <input type="text" name="Molding" class="span12" value="<?php echo $row_productList['Molding']; ?>" />
+                        </div>
+                        <div class="span6">
+                            <label>Inner Molding</label>
+                            <input type="text" name="InnerMolding" class="span12" value="<?php echo $row_productList['InnerMolding']; ?>" />
+                        </div>
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <div class="span3">
+                            <label>Mat 1</label>
+                            <input type="text" name="Mat1" class="span12" value="<?php echo $row_productList['Mat1']; ?>" />
+                        </div>
+                        <div class="span3">
+                            <label>Mat 2</label>
+                            <input type="text" name="Mat2" class="span12" value="<?php echo $row_productList['Mat2']; ?>" />
+                        </div>
+                        <div class="span3">
+                            <label>Mat 3</label>
+                            <input type="text" name="Mat3" class="span12" value="<?php echo $row_productList['Mat3']; ?>" />
+                        </div>
+                        <div class="span3">
+                            <label>Mat 4</label>
+                            <input type="text" name="Mat4" class="span12" value="<?php echo $row_productList['Mat4']; ?>" />
+                        </div>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <label>Clients</label>
+                        <div id="FB" class="">
+                            <select  name="CustomerIDs" id="CustomerIDs">
+                                <?php
+                                $myarray= explode(',',$row_productList['CustomerIDs']);
+
+                                do {
+
+                                    ?>
+                                    <option value="<?php echo $row_rsCustList['CustomersID']?>"<?php if ((in_array($row_rsCustList['CustomersID'], $myarray, TRUE))) {echo " class=\"selected\"";} ?>><?php echo $row_rsCustList['Company']?></option>
+                                    <?php
+                                } while ($row_rsCustList = mysqli_fetch_assoc($rsCustList));
+                                $rows = mysqli_num_rows($rsCustList);
+                                if($rows > 0) {
+                                    mysqli_data_seek($rsCustList, 0);
+                                    $row_rsCustList = mysqli_fetch_assoc($rsCustList);
+                                }
+
+                                ?>
+                            </select>
+                        </div>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+
+                        <label>Product Info</label>
+                        <textarea name="ProductInfo" class="span12"><?php echo $row_productList['ProductInfo']; ?></textarea>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <label>Reports</label>
+                        <textarea name="Reports" id="Reports" class="span12" ><?php echo $row_productList['Reports']; ?></textarea>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <label>Tags</label>
+                        <textarea name="Tags" id="Tags" class="span12" ><?php echo $row_productList['Tags']; ?></textarea>
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <label class="checkbox">
+                            <input <?php if (!(strcmp($row_productList['Confirmed'],"1"))) {echo "checked=\"checked\"";} ?> type="checkbox" name="Confirmed" value="" />
+                            Check if product is Confirmed.
+                        </label>
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <label class="checkbox">
+                            <input <?php if (!(strcmp($row_productList['Discontinued'],"1"))) {echo "checked=\"checked\"";} ?> type="checkbox" name="Discontinued" value="" />
+                            Check if product is discontinued.
+                        </label>
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+
+                <input type="hidden" name="MM_insert" value="productForm" />
+                <div class="row-fluid">
+                    <div class="span12">
+
+                        <a href="#myModalDelete" role="button" class="btn btn-danger span3" data-toggle="modal"><i class="icon-trash icon-white"></i>Delete</a>
+                        <a href="#myModalDuplicate" role="button" class="btn span4" data-toggle="modal"><i class="icon-repeat"></i>Duplicate</a>
+                        <button class="btn btn-primary span5" type="submit" id="addproduct"><i class="icon-file icon-white"></i> Save</button>
+
+
+                    </div><!--span12-->
+                </div><!--row-fluid-->
+
+
+                <div id="myModalDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="myModalLabel">Delete Product</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove this product and components?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                        <button class="btn btn-danger" type="submit" id="deleteproduct"><i class="icon-trash icon-white"></i>Delete</button>
+                    </div>
+                </div>
+
+                <div id="myModalDuplicate" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="myModalLabel">Duplicate Product</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to Duplicate this product and components?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                        <button class="btn " type="submit" id="duplicateproduct"><i class="icon-repeat"></i>Duplicate</button>
+                    </div>
+                </div>
+                <div id="result"></div>
+
+            </form>
+            <small>Created by: <?php echo $row_productList['CreatedBy']; ?> on <?php echo $row_productList['CreateDate']; ?> </small><br>
+            <small>Modified by: <?php echo $row_productList['ModifiedBy']; ?> on <?php echo $row_productList['AlterDate']; ?></small><br>
+        </div>
+        <div class="span7">
+            <legend> Components </legend>
+            <!--Body content-->
+            <div id="ComponentTableContainer"></div>
+            <!--Body content end-->
+        </div>
+    </div>
+</div>
+<script>
+    var proidVar = $( '#ProductID' ).val();
+    $(document).ready(function(){
+        $('#Tags').tagsInput({
+            width: 'auto',
+            onChange: function(elem, elem_tags)
+            {
+                var languages = ['php','ruby','javascript'];
+                $('.tag', elem_tags).each(function()
+                {
+                    if($(this).text().search(new RegExp('\\b(' + languages.join('|') + ')\\b')) >= 0)
+                        $(this).css('background-color', 'yellow');
+                });
+            }
+
+        });
+
+        $('#Reports').tagsInput({
+            width: 'auto',
+            onChange: function(elem, elem_tags)
+            {
+                var languages = ['php','ruby','javascript'];
+                $('.tag', elem_tags).each(function()
+                {
+                    if($(this).text().search(new RegExp('\\b(' + languages.join('|') + ')\\b')) >= 0)
+                        $(this).css('background-color', 'yellow');
+                });
+            }
+
+        });
+
+
+        $("#CustomerIDs").fcbkcomplete({
+            json_url: "data.php",
+            addontab: true,
+            maxitems: 10,
+            input_min_size: 0,
+            height: 40,
+            width: "",
+            cache: true,
+            newel: false,
+            firstselected:true,
+            filter_selected:true,
+            select_all_text: "add all",
+            onselect: function() {
+                var optionList;
+                $("option",this).each(function() {
+                    optionList += $(this).attr("id") + " : " + $(this).val() + "\n";
+                });
+            }
+        });
+
+        (function($) {
+            $.fn.currencyFormat = function() {
+                this.each( function( i ) {
+                    $(this).change( function( e ){
+                        if( isNaN( parseFloat( this.value ) ) ) return;
+                        this.value = parseFloat(this.value).toFixed(3);
+                    });
+                });
+                return this; //for chaining
+            }
+        })( jQuery );
+
+
+        function CompTotal() {
+            var UnitCost = 0;
+            $("td.UnitCost").each(function() {UnitCost += Number($(this).html());});
+            $("#Cost").val((UnitCost).toFixed(3));
+            $('#Percentage').val((Number((($('#Cost').val() / $('#Price').val())*100))).toFixed(3));
+            $('#TotalCost').val((Number(($('#Cost').val() * $('#Multiplier').val()))).toFixed(3));
+            $('#TotalPrice').val((Number(($('#Price').val() * $('#Multiplier').val()))).toFixed(3));
+        }
+
+        $('#Price').on('keyup keypress blur change', function() {
+            $('#Percentage').val((Number((($('#Cost').val() / $('#Price').val())*100))).toFixed(3));
+            $('#TotalPrice').val((Number(($('#Price').val() * $('#Multiplier').val()))).toFixed(3));
+        });
+        $('#Multiplier').on('keyup keypress blur change', function() {
+            $('#TotalCost').val((Number(($('#Cost').val() * $('#Multiplier').val()))).toFixed(3));
+            $('#TotalPrice').val((Number(($('#Price').val() * $('#Multiplier').val()))).toFixed(3));
+        });
+
+        //Prepare jTable
+        $('#ComponentTableContainer').jtable({
+
+            deleteConfirmation: function(data) {data.deleteConfirmMessage = 'Are you sure to delete  ' + data.record.ComponentName + '?';},
+            title: '&nbsp;',
+            actions: {
+                listAction:   'actions/component-crud.php?action=list&ProductID='+proidVar,
+                createAction: 'actions/component-crud.php?action=create&ProductID='+proidVar,
+                updateAction: 'actions/component-crud.php?action=update',
+                deleteAction: 'actions/component-crud.php?action=delete'
+            },
+            fields: {
+                ComponentID: {
+                    key: true,
+                    list: false
+                },
+                ComponentName: {
+                    title: 'Component',
+                    width: 'auto',
+                    inputClass: 'validate[required]'
+                },
+                UnitOfMeasure: {
+                    title: 'Unit',
+                    width: 'auto',
+                    list: false
+                },
+                DimentionsModifier: {
+                    title: 'Dimentions Modifier (in)',
+                    width: 'auto',
+                    inputClass: 'validate[required]',
+                    defaultValue:'0',
+                    list: false
+                },
+                Scrap: {
+                    title: 'Scrap %',
+                    width: 'auto',
+                    inputClass: 'validate[required]',
+                    defaultValue:'0',
+                    list: false
+                },
+                Quantity: {
+                    title: 'Qty',
+                    width: 'auto',
+                    inputClass: 'validate[required]'
+                },
+                UnitCost: {
+                    title: 'Unit Cost',
+                    width: 'auto',
+                    inputClass: 'validate[required]'
+
+                },
+                ExtendedCost: {
+                    title: 'Cost',
+                    width: 'auto',
+                    listClass: 'UnitCost'
+//					display: function (data) {
+//        return (parseFloat(data.record.Quantity) * parseFloat(data.record.UnitCost)) ;
+//   }
+                },
+
+                Report: {
+                    title: 'Add to Report',
+                    type: 'checkbox',
+                    values: { '0': 'No', '1': 'Yes' },
+                    defaultValue: '0',
+                    width: 'auto',
+                    height: '80px',
+                    list: false
+                },
+
+                ComponentInfo: {
+                    title: 'Info',
+                    width: 'auto',
+                    list: false,
+                    type: 'textarea'
+                }
+
+
+//				,
+//				TestColumn: {
+//    title: 'Test',
+
+//}
+
+            },
+            formCreated: function (event, data) {
+                var availableTags = 'actions/componentlist_drpdwn.php?action=compname';
+                $('#Edit-ComponentName').autocomplete({
+                    source: availableTags,
+                    autoFocus: true,
+                    close: function (event, data) {
+                        var H = ($('#PHeight').val());
+                        var W = ($('#PWidth').val());
+                        var Dmod = ($('#Edit-DimentionsModifier').val());
+                        var scrap = ($('#Edit-Scrap').val()/100);
+                        var sq = (((+H + +Dmod)/12)*((+W + +Dmod)/12)).toFixed(3);
+                        var sqft = ((+sq) + +(sq*scrap)).toFixed(3);
+                        var ln = ((((+H + +Dmod)+(+W + +Dmod))*2)/12).toFixed(3);
+                        var lnft = ((+ln) + +(ln*scrap)).toFixed(3);
+                        var availableTags1 = 'actions/componentlist_drpdwn.php?action=compunit&myterm='+ this.value;
+                        var availableTags2 = 'actions/componentlist_drpdwn.php?action=compcost&myterm='+ this.value;
+                        var availableTags3 = 'actions/componentlist_drpdwn.php?action=compwidth&myterm='+ this.value;
+                        $('#Edit-UnitOfMeasure').autocomplete({source: availableTags1, autoFocus: true, minLength: 0, delay:0})
+                        $('#Edit-UnitCost').autocomplete({source: availableTags2, autoFocus: true, minLength: 0, delay:0})
+                        $('#Edit-DimentionsModifier').autocomplete({source: availableTags3, autoFocus: true, minLength: 0, delay:0})
+                        $('#Edit-Quantity').autocomplete({source: [ {
+                                label: "SF:"+sqft+"",
+                                value: ""+sqft+""
+                            },{
+                                label: "LF:"+ lnft +"",
+                                value: ""+ lnft +""
+                            }], autoFocus: true, minLength: 0, delay:0})
+                    }
+                }).bind("blur",function (event, data) {
+                    var H = ($('#PHeight').val());
+                    var W = ($('#PWidth').val());
+                    var Dmod = ($('#Edit-DimentionsModifier').val());
+                    var scrap = ($('#Edit-Scrap').val()/100);
+                    var sq = (((+H + +Dmod)/12)*((+W + +Dmod)/12)).toFixed(3);
+                    var sqft = ((+sq) + +(sq*scrap)).toFixed(3);
+                    var ln = ((((+H + +Dmod)+(+W + +Dmod))*2)/12).toFixed(3);
+                    var lnft = ((+ln) + +(ln*scrap)).toFixed(3);
+                    var availableTags1 = 'actions/componentlist_drpdwn.php?action=compunit&myterm='+ this.value;
+                    var availableTags2 = 'actions/componentlist_drpdwn.php?action=compcost&myterm='+ this.value;
+                    var availableTags3 = 'actions/componentlist_drpdwn.php?action=compwidth&myterm='+ this.value;
+                    $('#Edit-UnitOfMeasure').autocomplete({source: availableTags1, autoFocus: true, minLength: 0, delay:0})
+                    $('#Edit-UnitCost').autocomplete({source: availableTags2, autoFocus: true, minLength: 0, delay:0})
+                    $('#Edit-DimentionsModifier').autocomplete({source: availableTags3, autoFocus: true, minLength: 0, delay:0})
+                    $('#Edit-Quantity').autocomplete({source: [ {
+                            label: "SF:"+sqft+"",
+                            value: ""+sqft+""
+                        },{
+                            label: "LF:"+ lnft +"",
+                            value: ""+ lnft +""
+                        }], autoFocus: true, minLength: 0, delay:0})
+                });
+
+                $('#Edit-UnitCost').on('keyup keypress blur change', function() {
+                    $('#Edit-ExtendedCost').val(($('#Edit-UnitCost').val() * $('#Edit-Quantity').val()).toFixed(3));
+                });
+                $('#Edit-Quantity').on('keyup keypress blur change', function() {
+                    $('#Edit-ExtendedCost').val(($('#Edit-UnitCost').val() * $('#Edit-Quantity').val()).toFixed(3));
+                });
+                $('#Edit-DimentionsModifier').on('keyup keypress blur change', function (event, data) {
+                    var H = ($('#PHeight').val());
+                    var W = ($('#PWidth').val());
+                    var Dmod = ($('#Edit-DimentionsModifier').val());
+                    var scrap = ($('#Edit-Scrap').val()/100);
+                    var sq = (((+H + +Dmod)/12)*((+W + +Dmod)/12)).toFixed(3);
+                    var sqft = ((+sq) + +(sq*scrap)).toFixed(3);
+                    var ln = ((((+H + +Dmod)+(+W + +Dmod))*2)/12).toFixed(3);
+                    var lnft = ((+ln) + +(ln*scrap)).toFixed(3);
+                    $('#Edit-Quantity').val('');
+
+                    $('#Edit-Quantity').autocomplete({source: [ {
+                            label: "SF:"+sqft+"",
+                            value: ""+sqft+""
+                        },{
+                            label: "LF:"+ lnft +"",
+                            value: ""+ lnft +""
+                        }], autoFocus: true, minLength: 0, delay:0})
+                });
+                $('#Edit-Scrap').on('keyup keypress blur change', function (event, data) {
+                    var H = ($('#PHeight').val());
+                    var W = ($('#PWidth').val());
+                    var Dmod = ($('#Edit-DimentionsModifier').val());
+                    var scrap = ($('#Edit-Scrap').val()/100);
+                    var sq = (((+H + +Dmod)/12)*((+W + +Dmod)/12)).toFixed(3);
+                    var sqft = ((+sq) + +(sq*scrap)).toFixed(3);
+                    var ln = ((((+H + +Dmod)+(+W + +Dmod))*2)/12).toFixed(3);
+                    var lnft = ((+ln) + +(ln*scrap)).toFixed(3);
+                    $('#Edit-Quantity').val('');
+
+                    $('#Edit-Quantity').autocomplete({source: [ {
+                            label: "SF:"+sqft+"",
+                            value: ""+sqft+""
+                        },{
+                            label: "LF:"+ lnft +"",
+                            value: ""+ lnft +""
+                        }], autoFocus: true, minLength: 0, delay:0})
+                });
+
+            },
+            formClosed: function (event, data) {
+                CompTotal();
+            },
+            rowsRemoved: function (event, data) {
+                CompTotal();
+            }
+
+        });
+
+        //Load person list from server
+        $('#ComponentTableContainer').jtable('load');
+
+
+
+//jtable
+    });
+
+    $('#addproduct').click(function (e) {
+
+        if ( $('input[name=ProductName]').val() === "" ) {
+            e.preventDefault();
+            alert( "A Product Name is required." );
+            $('input[name=ProductName]').focus();
+            return;
+        }
+        //else if ( $('input[name=ProductCode]').val().match(/[^a-zA-Z0-9_\-]/) || $('input[name=ProductCode]').val()===""  ) {\
+        else if ( $('input[name=ProductCode]').val()===""  ) {
+            e.preventDefault();
+            alert( "A unique Product Code is required." );
+            $('input[name=ProductCode]').focus();
+            return;
+        }
+        //else if ( $('input[name=Dimensions]').val().match(/\d{1,2}[x]{1}\d{1,2}/) || $('input[name=Dimensions]').val()==="" ) {
+        else if ($('input[name=PHeight]').val()==="" ) {
+            e.preventDefault();
+            alert( "Height is required." );
+            $('input[name=PHeight]').focus();
+            return;
+        }
+        else if ($('input[name=PWidth]').val()==="" ) {
+            e.preventDefault();
+            alert( "Width is required." );
+            $('input[name=PWidth]').focus();
+            return;
+        }
+
+
+    });
+    $('#deleteproduct').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url: 'actions/product-crud.php?action=delete',
+            data:$('#productForm').serialize(),
+            success: function(response) {
+                $('#productForm').find('#result').html(response);$('#productForm').find('#result').html("<div class=\"alert\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Success!</strong> Item was successfully deleted</div>");
+                window.setTimeout(function() {
+                    $(".alert").fadeTo(100, 0).slideUp(500, function(){
+                        $(this).remove();
+                    })}, 1000);
+                $("input[type=text], textarea").val("");
+                $("#ProductID").val("");
+                window.location.replace("products-add.php");
+            }});
+
+
+    });
+    $('#duplicateproduct').click(function (e) {
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url: 'actions/product-crud.php?action=duplicate',
+            data:$('#productForm').serialize(),
+            success: function(response) {
+                var myres = response.replace('"','');
+                window.location.replace(myres);
+
+            }});
+    });
+
+
+</script>
+<script>
+
+
+</script>
+<hr>
+<?php require_once('footer.php'); ?>
+<?php
+mysqli_free_result($productList);
+?>

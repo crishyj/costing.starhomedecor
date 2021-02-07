@@ -1,0 +1,10 @@
+<?php
+# FileName="Connection_php_mysql.htm"
+# Type="MYSQL"
+# HTTP="true"
+$hostname_StarCreations = "mariadb-086.wc2.dfw3.stabletransit.com";
+$database_StarCreations = "1032429_starapp";
+$username_StarCreations = "1032429_starinap";
+$password_StarCreations = "D7wj37?s$7Hx%3dJ";
+$StarCreations = mysql_pconnect($hostname_StarCreations, $username_StarCreations, $password_StarCreations) or trigger_error(mysql_error(),E_USER_ERROR); 
+?>
